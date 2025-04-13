@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <title>LUBE YOU</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="fixed-header">
-    <h1 class="header-title small">Корзина</h1>
+    <h1 class="header-title">LUBE YOU</h1>
     <div class="cart" onclick="openCart()">
       🛒 <span id="cart-count">0</span>
     </div>
@@ -19,27 +20,9 @@
   <div class="toast" id="toast"></div>
 
   <footer class="fixed-footer">
-    <button class="checkout-button large" onclick="openCart()">Оформить заказ</button>
+    <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
-  <script>
-    // Определяем тему на основе Telegram WebApp
-    if (window.Telegram?.WebApp) {
-      const theme = window.Telegram.WebApp.colorScheme; // "light" или "dark"
-      if (theme === "dark") {
-        document.body.classList.add("dark");
-      } else {
-        document.body.classList.remove("dark");
-      }
-    } else {
-      // Fallback на системную тему
-      const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (darkMode) {
-        document.body.classList.add("dark");
-      }
-    }
-  </script>
   <script src="script.js"></script>
-  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92f831350d96674d',t:'MTc0NDUxODI0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

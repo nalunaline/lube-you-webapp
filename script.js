@@ -1,138 +1,138 @@
 const container = document.getElementById("product-list");
 const cartCount = document.getElementById("cart-count");
+const toast = document.getElementById("toast");
 
-let cart = {};
+let cart = JSON.parse(localStorage.getItem('cart')) || {};
 
-// Данные напрямую из Google Sheets
-const directData = [
-  {"ID":"1","Name":"J-Lube Powder 7g","Category":"Lubricants","Description":"Powder for preparing lubricant and soap bubbles, 7g, universal","Usage":"Intimate use, soap bubbles","Price":"251","Photo":"https://nalunaline.github.io/lube-you-webapp/assets/images/jlube28b.jpg"},
-  {"ID":"2","Name":"K-Lube Powder 18g","Category":"Lubricants","Description":"Powder for lubricant, 18g, suitable for massage and intimate use","Usage":"Massage, intimate use","Price":"549","Photo":"https://nalunaline.github.io/lube-you-webapp/assets/images/jlube56b.jpg"},
-  {"ID":"3","Name":"J-Lube Powder 56g","Category":"Lubricants","Description":"Powder for lubricant, 56g, economical volume for regular use","Usage":"Intimate, professional use","Price":"521","Photo":"https://nalunaline.github.io/lube-you-webapp/assets/images/jlube7.jpg"}
+// Данные товаров
+const products = [
+  {
+    id: "1",
+    name: "J-Lube Powder 7g",
+    category: "Lubricants",
+    description: "Powder for preparing lubricant and soap bubbles, 7g, universal",
+    usage: "Intimate use, soap bubbles",
+    price: 251,
+    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube28b.jpg"
+  },
+  // ... остальные товары
 ];
+
+// Инициализация
+function init() {
+  updateCartCount();
+  setupTheme();
+  renderProducts(products);
+}
+
+// Работа с корзиной
+function updateCart() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartCount();
+}
 
 function updateCartCount() {
   const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
   cartCount.textContent = total;
 }
 
-function showToast(message) {
-  const toast = document.getElementById("toast");
-  toast.textContent = message;
-  toast.classList.add("visible");
-  setTimeout(() => toast.classList.remove("visible"), 3000);
+// Взаимодействие с Telegram WebApp
+function setupTheme() {
+  if (!window.Telegram?.WebApp) return;
+  
+  const theme = window.Telegram.WebApp.colorScheme;
+  document.body.classList.toggle('dark', theme === 'dark');
+  
+  window.Telegram.WebApp.onEvent('themeChanged', () => {
+    const newTheme = window.Telegram.WebApp.colorScheme;
+    document.body.classList.toggle('dark', newTheme === 'dark');
+  });
 }
 
 function openCart() {
-  const items = Object.values(cart).map(item => ({
-    title: item.Name,
-    price: parseFloat(item.Price.replace(/[^0-9.]/g, '')) || 0,
-    quantity: item.quantity
-  }));
+  const items = Object.values(cart)
+    .filter(item => item.quantity > 0)
+    .map(item => ({
+      title: item.name,
+      price: item.price,
+      quantity: item.quantity
+    }));
+
   if (items.length === 0) {
     showToast("Корзина пуста");
     return;
   }
+
   if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.sendData(JSON.stringify({ items }));
+    try {
+      window.Telegram.WebApp.sendData(JSON.stringify({ items }));
+    } catch (e) {
+      console.error("Ошибка отправки данных:", e);
+      showToast("Ошибка отправки заказа");
+    }
   } else {
-    console.log("Telegram Web App не доступен, данные:", { items });
-    showToast("Ошибка: Telegram Web App не доступен");
+    console.log("Данные заказа (тест):", { items });
+    showToast("Режим тестирования: заказ не отправлен");
   }
 }
 
-function renderProducts(data) {
-  console.log("Вызов renderProducts с данными:", data);
-  container.innerHTML = "";
-  if (!data || data.length === 0) {
-    container.innerHTML = "<div>Товары не найдены.</div>";
-    console.warn("Данные пусты");
+// Отображение товаров
+function renderProducts(products) {
+  if (!products?.length) {
+    container.innerHTML = "<div class='empty'>Товары не найдены</div>";
     return;
   }
-  data.forEach(product => {
-    if (!product.ID || !product.Name) {
-      console.warn("Некорректные данные продукта:", product);
-      return;
-    }
-    const card = document.createElement("div");
-    card.className = "product-card";
 
-    const img = document.createElement("img");
-    const baseUrl = "https://nalunaline.github.io/lube-you-webapp/";
-    img.src = product.Photo.startsWith("http") ? product.Photo : baseUrl + product.Photo;
-    img.alt = product.Name || "Товар";
-    img.className = "product-image";
-    img.onerror = () => { img.src = "https://via.placeholder.com/150"; };
-    card.appendChild(img);
-
-    const title = document.createElement("div");
-    title.className = "product-title";
-    title.textContent = product.Name || "Без названия";
-    card.appendChild(title);
-
-    const category = document.createElement("div");
-    category.className = "product-category";
-    category.textContent = product.Category || "Без категории";
-    card.appendChild(category);
-
-    const desc = document.createElement("div");
-    desc.className = "product-description";
-    desc.textContent = product.Description || "Нет описания";
-    card.appendChild(desc);
-
-    const usage = document.createElement("div");
-    usage.className = "product-usage";
-    usage.textContent = product.Usage || "Нет информации";
-    card.appendChild(usage);
-
-    const price = document.createElement("div");
-    price.className = "product-price";
-    price.textContent = `${product.Price || 0}₽`;
-    card.appendChild(price);
-
-    const controls = document.createElement("div");
-    controls.className = "product-controls";
-
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "−";
-    removeBtn.onclick = () => {
-      if (cart[product.ID]) {
-        cart[product.ID].quantity--;
-        if (cart[product.ID].quantity <= 0) delete cart[product.ID];
-        updateCartCount();
-        qty.textContent = cart[product.ID]?.quantity || 0;
-      }
-    };
-    controls.appendChild(removeBtn);
-
-    const qty = document.createElement("div");
-    qty.className = "quantity";
-    qty.textContent = cart[product.ID]?.quantity || 0;
-    controls.appendChild(qty);
-
-    const addBtn = document.createElement("button");
-    addBtn.textContent = "+";
-    addBtn.onclick = () => {
-      if (!cart[product.ID]) {
-        cart[product.ID] = { ...product, quantity: 0 };
-      }
-      cart[product.ID].quantity++;
-      updateCartCount();
-      qty.textContent = cart[product.ID].quantity;
-      showToast("Добавлено в корзину");
-    };
-    controls.appendChild(addBtn);
-
-    card.appendChild(controls);
-    container.appendChild(card);
-  });
+  container.innerHTML = products.map(product => `
+    <div class="product-card" data-id="${product.id}">
+      <img src="${product.photo}" alt="${product.name}" class="product-image" 
+           onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+      <div class="product-info">
+        <h3 class="product-title">${product.name}</h3>
+        <div class="product-price">${product.price}₽</div>
+        <div class="product-description">${product.description}</div>
+        <div class="product-controls">
+          <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)">−</button>
+          <span class="quantity">${cart[product.id]?.quantity || 0}</span>
+          <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
-if (!container) {
-  console.error("Контейнер product-list не найден");
-} else {
-  console.log("Используем прямые данные для теста...");
-  container.innerHTML = "<div>Загрузка товаров...</div>";
-  setTimeout(() => {
-    renderProducts(directData);
-  }, 1000);
+// Вспомогательные функции
+function changeQuantity(productId, delta) {
+  if (!cart[productId]) {
+    cart[productId] = { ...products.find(p => p.id === productId), quantity: 0 };
+  }
+  
+  cart[productId].quantity += delta;
+  
+  if (cart[productId].quantity <= 0) {
+    delete cart[productId];
+  }
+  
+  updateCart();
+  updateProductQuantity(productId);
+  
+  if (delta > 0) {
+    showToast("Добавлено в корзину");
+  }
 }
+
+function updateProductQuantity(productId) {
+  const quantityElement = container.querySelector(`.product-card[data-id="${productId}"] .quantity`);
+  if (quantityElement) {
+    quantityElement.textContent = cart[productId]?.quantity || 0;
+  }
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
+}
+
+// Запуск приложения
+document.addEventListener('DOMContentLoaded', init);
