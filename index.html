@@ -1,0 +1,35 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LUBE YOU</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="fixed-header">
+    <h1 class="header-title small">Корзина</h1>
+    <div class="cart" onclick="openCart()">
+      🛒 <span id="cart-count">0</span>
+    </div>
+  </header>
+
+  <main id="product-list" class="scrollable-content"></main>
+
+  <div class="toast" id="toast">Добавлено в корзину</div>
+
+  <footer class="fixed-footer">
+    <button class="checkout-button large" onclick="openCart()">Оформить заказ</button>
+  </footer>
+
+  <script>
+    // Проверка темы и применение класса для контраста
+    const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (darkMode) {
+      document.body.classList.add('dark');
+    }
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
