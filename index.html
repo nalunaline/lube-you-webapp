@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -17,14 +16,13 @@
 
   <main id="product-list" class="scrollable-content"></main>
 
-  <div class="toast" id="toast">Добавлено в корзину</div>
+  <div class="toast" id="toast"></div>
 
   <footer class="fixed-footer">
     <button class="checkout-button large" onclick="openCart()">Оформить заказ</button>
   </footer>
 
   <script>
-    // Проверка темы и применение класса для контраста
     const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (darkMode) {
       document.body.classList.add('dark');

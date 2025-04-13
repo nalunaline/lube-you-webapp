@@ -1,9 +1,7 @@
-
 const sheetUrl = "https://opensheet.elk.sh/2PACX-1vTQyyvsf636pYFNYDoLHF3rBnIY6YXAkXcVU7ot--JfO1a49fOeuYcfRtqfSOYA8vLojXhsIjLuTnbi/products";
 
-const container = document.getElementById("product-container");
+const container = document.getElementById("product-list");
 const cartCount = document.getElementById("cart-count");
-const loader = document.getElementById("loader");
 
 let cart = {};
 
@@ -13,87 +11,112 @@ function updateCartCount() {
 }
 
 function showToast(message) {
-  const toast = document.createElement("div");
-  toast.className = "toast visible";
+  const toast = document.getElementById("toast");
   toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+  toast.classList.add("visible");
+  setTimeout(() => toast.classList.remove("visible"), 3000);
 }
 
-fetch(sheetUrl)
-  .then(res => res.json())
-  .then(data => {
-    loader.remove();
-    data.forEach(product => {
-      const card = document.createElement("div");
-      card.className = "product-card";
+function openCart() {
+  const items = Object.values(cart).map(item => ({
+    title: item.Name,
+    price: parseFloat(item.Price),
+    quantity: item.quantity
+  }));
+  if (items.length === 0) {
+    showToast("Корзина пуста");
+    return;
+  }
+  // Отправка данных в Telegram Web App
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.sendData(JSON.stringify({ items }));
+  } else {
+    console.log("Telegram Web App не доступен, данные:", { items });
+  }
+}
 
-      const img = document.createElement("img");
-      img.src = product.Photo || "placeholder.png";
-      img.alt = product.Name;
-      img.className = "product-image";
-      card.appendChild(img);
+if (!container) {
+  console.error("Контейнер product-list не найден");
+} else {
+  fetch(sheetUrl)
+    .then(res => {
+      if (!res.ok) throw new Error("Ошибка загрузки данных");
+      return res.json();
+    })
+    .then(data => {
+      if (!data || data.length === 0) {
+        container.innerHTML = "<div>Товары не найдены</div>";
+        return;
+      }
+      data.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
 
-      const title = document.createElement("div");
-      title.className = "product-title";
-      title.textContent = product.Name;
-      card.appendChild(title);
+        const img = document.createElement("img");
+        img.src = product.Photo || "placeholder.png";
+        img.alt = product.Name;
+        img.className = "product-image";
+        card.appendChild(img);
 
-      const desc = document.createElement("div");
-      desc.className = "product-description";
-      desc.textContent = product.Description;
-      card.appendChild(desc);
+        const title = document.createElement("div");
+        title.className = "product-title";
+        title.textContent = product.Name;
+        card.appendChild(title);
 
-      const usage = document.createElement("div");
-      usage.className = "product-usage";
-      usage.textContent = product.Usage;
-      card.appendChild(usage);
+        const desc = document.createElement("div");
+        desc.className = "product-description";
+        desc.textContent = product.Description;
+        card.appendChild(desc);
 
-      const price = document.createElement("div");
-      price.className = "product-price";
-      price.textContent = `${product.Price}₽`;
-      card.appendChild(price);
+        const usage = document.createElement("div");
+        usage.className = "product-usage";
+        usage.textContent = product.Usage;
+        card.appendChild(usage);
 
-      const controls = document.createElement("div");
-      controls.className = "product-controls";
+        const price = document.createElement("div");
+        price.className = "product-price";
+        price.textContent = `${product.Price}₽`;
+        card.appendChild(price);
 
-      const removeBtn = document.createElement("button");
-      removeBtn.textContent = "−";
-      removeBtn.onclick = () => {
-        if (cart[product.ID]) {
-          cart[product.ID].quantity--;
-          if (cart[product.ID].quantity <= 0) delete cart[product.ID];
-        }
-        updateCartCount();
-        qty.textContent = cart[product.ID]?.quantity || 0;
-      };
-      controls.appendChild(removeBtn);
+        const controls = document.createElement("div");
+        controls.className = "product-controls";
 
-      const qty = document.createElement("div");
-      qty.className = "quantity";
-      qty.textContent = cart[product.ID]?.quantity || 0;
-      controls.appendChild(qty);
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "−";
+        removeBtn.onclick = () => {
+          if (cart[product.ID]) {
+            cart[product.ID].quantity--;
+            if (cart[product.ID].quantity <= 0) delete cart[product.ID];
+          }
+          updateCartCount();
+          qty.textContent = cart[product.ID]?.quantity || 0;
+        };
+        controls.appendChild(removeBtn);
 
-      const addBtn = document.createElement("button");
-      addBtn.textContent = "+";
-      addBtn.onclick = () => {
-        if (!cart[product.ID]) {
-          cart[product.ID] = { ...product, quantity: 0 };
-        }
-        cart[product.ID].quantity++;
-        updateCartCount();
-        qty.textContent = cart[product.ID].quantity;
-        showToast("Добавлено в корзину");
-      };
-      controls.appendChild(addBtn);
+        const qty = document.createElement("div");
+        qty.className = "quantity";
+        qty.textContent = cart[product.ID]?.  cart[product.ID]?.quantity || 0;
+        controls.appendChild(qty);
 
-      card.appendChild(controls);
-      container.appendChild(card);
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+";
+        addBtn.onclick = () => {
+          if (!cart[product.ID]) {
+            cart[product.ID] = { ...product, quantity: 0 };
+          }
+          cart[product.ID].quantity++;
+          updateCartCount();
+          qty.textContent = cart[product.ID].quantity;
+          showToast("Добавлено в корзину");
+        };
+        controls.appendChild(addBtn);
+
+        card.appendChild(controls);
+        container.appendChild(card);
+      });
+    })
+    .catch(err => {
+      container.innerHTML = "<div>Ошибка загрузки данных</div>";
+      console.error(err);
     });
-  })
-  .catch(err => {
-    loader.remove();
-    const error = document.createElement("div");
-    error.textContent = "Ошибка загрузки данных";
-    container.appendChild(error);
-  });
+}
