@@ -20,14 +20,13 @@ function showToast(message) {
 function openCart() {
   const items = Object.values(cart).map(item => ({
     title: item.Name,
-    price: parseFloat(item.Price),
+    price: parseFloat(item.Price.replace(/[^0-9.]/g, '')) || 0,
     quantity: item.quantity
   }));
   if (items.length === 0) {
     showToast("Корзина пуста");
     return;
   }
-  // Отправка данных в Telegram Web App
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.sendData(JSON.stringify({ items }));
   } else {
@@ -38,12 +37,14 @@ function openCart() {
 if (!container) {
   console.error("Контейнер product-list не найден");
 } else {
+  container.innerHTML = "<div>Загрузка...</div>";
   fetch(sheetUrl)
     .then(res => {
       if (!res.ok) throw new Error("Ошибка загрузки данных");
       return res.json();
     })
     .then(data => {
+      container.innerHTML = "";
       if (!data || data.length === 0) {
         container.innerHTML = "<div>Товары не найдены</div>";
         return;
@@ -54,28 +55,28 @@ if (!container) {
 
         const img = document.createElement("img");
         img.src = product.Photo || "placeholder.png";
-        img.alt = product.Name;
+        img.alt = product.Name || "Товар";
         img.className = "product-image";
         card.appendChild(img);
 
         const title = document.createElement("div");
         title.className = "product-title";
-        title.textContent = product.Name;
+        title.textContent = product.Name || "Без названия";
         card.appendChild(title);
 
         const desc = document.createElement("div");
         desc.className = "product-description";
-        desc.textContent = product.Description;
+        desc.textContent = product.Description || "";
         card.appendChild(desc);
 
         const usage = document.createElement("div");
         usage.className = "product-usage";
-        usage.textContent = product.Usage;
+        usage.textContent = product.Usage || "";
         card.appendChild(usage);
 
         const price = document.createElement("div");
         price.className = "product-price";
-        price.textContent = `${product.Price}₽`;
+        price.textContent = `${product.Price || 0}₽`;
         card.appendChild(price);
 
         const controls = document.createElement("div");
@@ -95,7 +96,7 @@ if (!container) {
 
         const qty = document.createElement("div");
         qty.className = "quantity";
-        qty.textContent = cart[product.ID]?.  cart[product.ID]?.quantity || 0;
+        qty.textContent = cart[product.ID]?.quantity || 0;
         controls.appendChild(qty);
 
         const addBtn = document.createElement("button");
