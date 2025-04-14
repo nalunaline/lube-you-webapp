@@ -5,7 +5,7 @@ const toast = document.getElementById("toast");
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 let products = [];
 
-// Прямые данные для теста (чтобы избежать CORS)
+// Прямые данные для теста
 const directData = [
   {
     id: "1",
@@ -36,12 +36,11 @@ const directData = [
   }
 ];
 
+// Загрузка продуктов
 function loadProducts() {
   try {
-    console.log("Загрузка продуктов...");
     container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
     
-    // Используем прямые данные для теста
     products = directData.map(item => ({
       id: item.id.toString(),
       name: item.name,
@@ -53,7 +52,6 @@ function loadProducts() {
     }));
     
     renderProducts();
-    console.log("Продукты загружены:", products);
   } catch (error) {
     console.error("Ошибка загрузки:", error);
     container.innerHTML = `<div class="error">Ошибка загрузки товаров: ${error.message}</div>`;
@@ -61,6 +59,7 @@ function loadProducts() {
   }
 }
 
+// Отображение продуктов
 function renderProducts() {
   container.innerHTML = products.map(product => `
     <div class="product-card" data-id="${product.id}">
@@ -82,80 +81,104 @@ function renderProducts() {
   `).join('');
 }
 
+// Изменение количества товара
 function changeQuantity(productId, delta) {
   try {
     const product = products.find(p => p.id === productId);
     if (!product) {
-      console.error("Продукт не найден:", productId);
       showToast("Товар не найден");
       return;
     }
 
     if (!cart[productId]) {
-      cart[productId] = { ...product, quantity: 0 };
+      cart[productId] = { 
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 0 
+      };
     }
 
-    cart[productId].quantity += delta;
+    const newQuantity = cart[productId].quantity + delta;
+    
+    // Проверка на отрицательное количество
+    if (newQuantity < 0) {
+      showToast("Количество не может быть отрицательным");
+      return;
+    }
 
-    if (cart[productId].quantity <= 0) {
+    cart[productId].quantity = newQuantity;
+
+    // Удаляем товар если количество 0
+    if (cart[productId].quantity === 0) {
       delete cart[productId];
       showToast(`${product.name} удалён из корзины`);
     } else {
-      showToast(delta > 0 ? `${product.name} добавлен в корзину` : `${product.name} удалён (1)`);
+      showToast(delta > 0 
+        ? `${product.name} добавлен в корзину` 
+        : `${product.name} удалён (1)`);
     }
 
-    // Сохраняем корзину в localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Обновляем отображение
+    saveCart();
     updateCartCount();
-    renderProducts(); // Перерисовываем, чтобы обновить количество
+    updateProductQuantity(productId);
   } catch (error) {
     console.error("Ошибка изменения количества:", error);
     showToast("Ошибка при обновлении корзины");
   }
 }
 
+// Обновление количества для конкретного товара (без полной перерисовки)
+function updateProductQuantity(productId) {
+  const quantityElement = document.querySelector(`.product-card[data-id="${productId}"] .quantity`);
+  if (quantityElement) {
+    quantityElement.textContent = cart[productId]?.quantity || 0;
+  }
+}
+
+// Сохранение корзины
+function saveCart() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// Обновление счетчика корзины
 function updateCartCount() {
-  try {
-    const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-    cartCount.textContent = total;
-  } catch (error) {
-    console.error("Ошибка обновления счётчика корзины:", error);
-    cartCount.textContent = '0';
-  }
+  const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+  cartCount.textContent = total;
 }
 
+// Показ уведомления
 function showToast(message) {
-  try {
-    toast.textContent = message;
-    toast.classList.add('visible');
-    setTimeout(() => toast.classList.remove('visible'), 3000);
-  } catch (error) {
-    console.error("Ошибка отображения уведомления:", error);
-  }
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
 }
 
+// Открытие корзины
 function openCart() {
   try {
-    const items = Object.values(cart).map(item => ({
-      title: item.name,
-      price: item.price,
-      quantity: item.quantity
-    }));
-
+    const items = Object.values(cart);
+    
     if (items.length === 0) {
       showToast("Корзина пуста");
       return;
     }
 
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const message = `Ваш заказ:\n${items.map(item => 
+      `- ${item.name} (${item.quantity} × ${item.price}₽)`
+    ).join('\n')}\n\nИтого: ${total}₽`;
+    
     if (window.Telegram?.WebApp) {
-      window.Telegram.WebApp.sendData(JSON.stringify({ items }));
-      console.log("Отправлены данные корзины:", items);
+      window.Telegram.WebApp.sendData(JSON.stringify({ 
+        items,
+        total
+      }));
       showToast("Заказ отправлен");
     } else {
-      console.log("Telegram Web App не доступен, данные:", items);
-      showToast("Ошибка: Telegram Web App не доступен");
+      alert(message);
+      console.log("Данные корзины:", { items, total });
+      showToast("Заказ сформирован (тестовый режим)");
     }
   } catch (error) {
     console.error("Ошибка при открытии корзины:", error);
