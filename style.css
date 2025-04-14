@@ -125,6 +125,21 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.quantity-btn:hover {
+  background: #3a5f8c;
+}
+
+.quantity-btn:active {
+  background: #2a4a70;
+}
+
+.quantity {
+  font-size: 1rem;
+  min-width: 20px;
+  text-align: center;
 }
 
 .checkout-button {
@@ -137,6 +152,15 @@ main {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.checkout-button:hover {
+  background: #3a5f8c;
+}
+
+.checkout-button:active {
+  background: #2a4a70;
 }
 
 /* Сообщения */

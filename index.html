@@ -22,6 +22,23 @@
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
+  <script>
+    // Определяем тему на основе Telegram WebApp
+    if (window.Telegram?.WebApp) {
+      const theme = window.Telegram.WebApp.colorScheme; // "light" или "dark"
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    } else {
+      // Fallback на системную тему
+      const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (darkMode) {
+        document.body.classList.add("dark");
+      }
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
