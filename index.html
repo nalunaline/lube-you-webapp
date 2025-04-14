@@ -3,23 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUBE YOU</title>
+  <title>Попперсы Москва | А...</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1>LUBE YOU</h1>
-    <div class="header-cart">
-      <div class="cart" onclick="openCart()">
-        🛒 <span id="cart-count">0</span>
-      </div>
-      <div class="cart-notification" id="cart-notification"></div>
-    </div>
+    <nav class="header-nav">
+      <button class="nav-btn" onclick="showCategory('poppers')">Каталог</button>
+      <button class="nav-btn" onclick="openCart()">Корзина <span id="cart-count">0</span></button>
+      <a class="nav-btn" href="https://t.me/am_danko" target="_blank">Связаться</a>
+    </nav>
   </header>
 
   <main id="product-list"></main>
 
   <footer>
+    <div class="footer-notice">
+      Уведомляем, что бот работает в тестовом режиме, в случае вопросов обращайтесь @egorpoppers
+    </div>
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 

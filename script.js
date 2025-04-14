@@ -5,65 +5,67 @@ const MAX_QUANTITY = 10;
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 let products = [];
 
-// Тестовые данные
-const testProducts = [
-  {
-    id: "1",
-    name: "J-Lube Powder 7g",
-    price: 251,
-    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube28b.jpg",
-    description: "Powder for lubricant, 7g"
-  },
-  {
-    id: "2",
-    name: "K-Lube Powder 18g", 
-    price: 549,
-    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube56b.jpg",
-    description: "Powder for lubricant, 18g"
-  }
-];
+// Категории товаров
+const categories = {
+  poppers: [
+    {
+      id: "1",
+      name: "Swiss Navy Naked 118...",
+      price: 1800,
+      category: "poppers",
+      image: "https://example.com/popper1.jpg"
+    },
+    {
+      id: "2",
+      name: "Amsterdam Gold 25ml",
+      price: 1400,
+      category: "poppers",
+      image: "https://example.com/popper2.jpg"
+    }
+  ],
+  lubricants: [
+    {
+      id: "3",
+      name: "Lemon Lubricant 100...",
+      price: 900,
+      category: "lubricants",
+      image: "https://example.com/lube1.jpg"
+    }
+  ]
+};
 
-function loadProducts() {
-  products = testProducts;
+function loadProducts(category = 'poppers') {
+  products = categories[category] || [];
   renderProducts();
 }
 
 function renderProducts() {
-  container.innerHTML = products.map(product => `
-    <div class="product-card" data-id="${product.id}">
-      <img src="${product.photo}" alt="${product.name}" class="product-image">
-      <div class="product-info">
+  container.innerHTML = products.map(product => {
+    const inCart = cart[product.id]?.quantity || 0;
+    return `
+      <div class="product-card" data-id="${product.id}">
+        <img src="${product.image}" alt="${product.name}" class="product-image">
         <h3 class="product-title">${product.name}</h3>
-        <div class="product-price">${product.price}₽</div>
-        <div class="product-description">${product.description}</div>
+        <div class="product-price">${product.price} ₽</div>
         <div class="product-controls">
-          <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)">−</button>
-          <span class="quantity">${cart[product.id]?.quantity || 0}</span>
-          <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">+</button>
+          ${inCart > 0 ? `
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)">-</button>
+              <div class="quantity-badge">${inCart}</div>
+              <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">+</button>
+            </div>
+          ` : `
+            <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">Добавить</button>
+          `}
         </div>
       </div>
-    </div>
-  `).join('');
-}
-
-function showNotification(message) {
-  const notification = document.getElementById('cart-notification');
-  if (!notification) return;
-
-  notification.textContent = message;
-  notification.classList.add('visible');
-  
-  setTimeout(() => {
-    notification.classList.remove('visible');
-  }, 3000);
+    `;
+  }).join('');
 }
 
 function changeQuantity(productId, delta) {
   const product = products.find(p => p.id === productId);
-  if (!product) {
-    showNotification("Товар не найден");
-    return;
-  }
+  if (!product) return;
 
   if (!cart[productId]) {
     cart[productId] = { ...product, quantity: 0 };
@@ -71,29 +73,18 @@ function changeQuantity(productId, delta) {
 
   const newQuantity = cart[productId].quantity + delta;
   
-  if (newQuantity < 0) {
-    showNotification("Минимальное количество: 0");
-    return;
-  }
-  
-  if (newQuantity > MAX_QUANTITY) {
-    showNotification(`Максимум: ${MAX_QUANTITY} шт.`);
-    return;
-  }
+  if (newQuantity < 0) return;
+  if (newQuantity > MAX_QUANTITY) return;
 
   cart[productId].quantity = newQuantity;
 
   if (cart[productId].quantity === 0) {
     delete cart[productId];
-    showNotification(`${product.name} удален`);
-  } else {
-    showNotification(delta > 0 
-      ? `${product.name} добавлен` 
-      : `${product.name} уменьшено`);
   }
 
   saveCart();
   updateCart();
+  renderProducts();
 }
 
 function saveCart() {
@@ -101,21 +92,25 @@ function saveCart() {
 }
 
 function updateCart() {
-  cartCount.textContent = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+  const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
+  cartCount.textContent = total > 0 ? `(${total})` : '';
 }
 
 function openCart() {
   if (Object.keys(cart).length === 0) {
-    showNotification("Корзина пуста");
+    alert("Корзина пуста");
     return;
   }
 
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.sendData(JSON.stringify(cart));
-    showNotification("Заказ отправлен");
   } else {
-    alert(`Тестовый режим\nТоваров: ${Object.values(cart).reduce((sum, item) => sum + item.quantity, 0)}`);
+    alert(`Заказ отправлен!\nТоваров: ${Object.values(cart).reduce((sum, item) => sum + item.quantity, 0)}`);
   }
+}
+
+function showCategory(category) {
+  loadProducts(category);
 }
 
 // Инициализация
