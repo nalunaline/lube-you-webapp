@@ -9,37 +9,26 @@
 <body>
   <header>
     <h1>LUBE YOU</h1>
-    <!-- В header замените div с корзиной на это: -->
-<div class="cart-container">
-  <div class="cart" onclick="openCart()">
-    🛒 <span id="cart-count">0</span>
-  </div>
-</div>
+    <div class="cart-container">
+      <div class="cart" onclick="openCart()">
+        🛒 <span id="cart-count">0</span>
+      </div>
+      <div class="cart-notification" id="cart-notification"></div>
+    </div>
   </header>
 
   <main id="product-list"></main>
-
-  <div class="toast" id="toast"></div>
 
   <footer>
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
   <script>
-    // Определяем тему на основе Telegram WebApp
+    // Определение темы
     if (window.Telegram?.WebApp) {
-      const theme = window.Telegram.WebApp.colorScheme; // "light" или "dark"
-      if (theme === "dark") {
-        document.body.classList.add("dark");
-      } else {
-        document.body.classList.remove("dark");
-      }
-    } else {
-      // Fallback на системную тему
-      const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (darkMode) {
-        document.body.classList.add("dark");
-      }
+      document.body.classList.toggle("dark", window.Telegram.WebApp.colorScheme === "dark");
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add("dark");
     }
   </script>
   <script src="script.js"></script>
