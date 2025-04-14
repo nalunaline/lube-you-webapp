@@ -46,9 +46,24 @@ function renderProducts() {
   `).join('');
 }
 
+function showNotification(message) {
+  const notification = document.getElementById('cart-notification');
+  if (!notification) return;
+
+  notification.textContent = message;
+  notification.classList.add('visible');
+  
+  setTimeout(() => {
+    notification.classList.remove('visible');
+  }, 3000);
+}
+
 function changeQuantity(productId, delta) {
   const product = products.find(p => p.id === productId);
-  if (!product) return;
+  if (!product) {
+    showNotification("Товар не найден");
+    return;
+  }
 
   if (!cart[productId]) {
     cart[productId] = { ...product, quantity: 0 };
@@ -57,12 +72,12 @@ function changeQuantity(productId, delta) {
   const newQuantity = cart[productId].quantity + delta;
   
   if (newQuantity < 0) {
-    showNotification('error');
+    showNotification("Минимальное количество: 0");
     return;
   }
   
   if (newQuantity > MAX_QUANTITY) {
-    showNotification('max');
+    showNotification(`Максимум: ${MAX_QUANTITY} шт.`);
     return;
   }
 
@@ -70,57 +85,36 @@ function changeQuantity(productId, delta) {
 
   if (cart[productId].quantity === 0) {
     delete cart[productId];
-    showNotification('remove', product.name);
+    showNotification(`${product.name} удален`);
   } else {
-    showNotification(delta > 0 ? 'add' : 'remove-one', product.name);
+    showNotification(delta > 0 
+      ? `${product.name} добавлен` 
+      : `${product.name} уменьшено`);
   }
 
   saveCart();
   updateCart();
 }
 
-function showNotification(type, productName = '') {
-  const notification = document.getElementById('cart-notification');
-  if (!notification) return;
-
-  const messages = {
-    add: `+1 ${productName}`,
-    'remove-one': `-1 ${productName}`,
-    remove: `${productName} удален`,
-    max: 'Максимум достигнут',
-    error: 'Ошибка'
-  };
-
-  notification.textContent = messages[type] || '';
-  notification.className = 'cart-notification';
-  
-  if (type === 'add') notification.style.background = '#4CAF50';
-  else if (type === 'remove' || type === 'remove-one') notification.style.background = '#2196F3';
-  else notification.style.background = '#ff4444';
-
-  notification.classList.add('visible');
-  document.querySelector('.cart').classList.add('bounce');
-  setTimeout(() => document.querySelector('.cart').classList.remove('bounce'), 500);
-
-  setTimeout(() => notification.classList.remove('visible'), 3000);
+function saveCart() {
+  localStorage.setItem('cart', JSON.stringify(cart));
 }
 
 function updateCart() {
-  localStorage.setItem('cart', JSON.stringify(cart));
   cartCount.textContent = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
 }
 
 function openCart() {
   if (Object.keys(cart).length === 0) {
-    showNotification('error');
+    showNotification("Корзина пуста");
     return;
   }
 
   if (window.Telegram?.WebApp) {
     window.Telegram.WebApp.sendData(JSON.stringify(cart));
-    showNotification('add');
+    showNotification("Заказ отправлен");
   } else {
-    alert(`Заказ отправлен (тест)\nТоваров: ${Object.values(cart).reduce((sum, item) => sum + item.quantity, 0)}`);
+    alert(`Тестовый режим\nТоваров: ${Object.values(cart).reduce((sum, item) => sum + item.quantity, 0)}`);
   }
 }
 

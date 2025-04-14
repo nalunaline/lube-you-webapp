@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>LUBE YOU</h1>
-    <div class="cart-container">
+    <div class="header-cart">
       <div class="cart" onclick="openCart()">
         🛒 <span id="cart-count">0</span>
       </div>
@@ -23,14 +23,6 @@
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
-  <script>
-    // Определение темы
-    if (window.Telegram?.WebApp) {
-      document.body.classList.toggle("dark", window.Telegram.WebApp.colorScheme === "dark");
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.body.classList.add("dark");
-    }
-  </script>
   <script src="script.js"></script>
 </body>
 </html>

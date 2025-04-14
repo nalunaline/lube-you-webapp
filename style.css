@@ -29,7 +29,6 @@ header, footer {
   background-color: var(--card-bg);
   padding: 1rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  z-index: 100;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -38,11 +37,44 @@ header, footer {
 header {
   position: sticky;
   top: 0;
+  z-index: 100;
 }
 
 footer {
   position: sticky;
   bottom: 0;
+}
+
+.header-cart {
+  position: relative;
+}
+
+.cart {
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.cart-notification {
+  position: absolute;
+  bottom: -30px;
+  right: 0;
+  background: #f0f0f0;
+  color: #333;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #ddd;
+}
+
+.cart-notification.visible {
+  opacity: 1;
 }
 
 main {
@@ -58,13 +90,8 @@ main {
   background: var(--card-bg);
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s;
   display: flex;
   flex-direction: column;
-}
-
-.product-card:hover {
-  transform: translateY(-5px);
 }
 
 .product-image {
@@ -112,9 +139,6 @@ main {
   height: 30px;
   font-size: 1rem;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .checkout-button {
@@ -127,49 +151,6 @@ main {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-}
-
-/* Стили для уведомлений */
-.cart-container {
-  position: relative;
-  display: inline-block;
-}
-
-.cart-notification {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  min-width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #ff4444;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  opacity: 0;
-  transform: scale(0.5);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 100;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
-
-.cart-notification.visible {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Анимации */
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.bounce {
-  animation: bounce 0.5s;
 }
 
 @media (max-width: 600px) {
