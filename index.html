@@ -3,40 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LUBE YOU</title>
+  <title>Попперсы Москва | А...</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <nav class="header-nav">
-      <button class="nav-btn active" onclick="showCatalog()">Каталог</button>
-      <button class="nav-btn" onclick="openCart()">Корзина <span id="cart-count">0</span></button>
+      <button class="nav-btn active" onclick="showCategory('poppers')">Каталог</button>
+      <button class="nav-btn" onclick="showCart()">Корзина <span id="cart-count">0</span></button>
     </nav>
   </header>
 
   <main id="product-list"></main>
 
-  <div class="toast" id="toast"></div>
-
-  <footer class="sticky-footer">
+  <footer>
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
-  <script>
-    if (window.Telegram?.WebApp) {
-      const theme = window.Telegram.WebApp.colorScheme;
-      if (theme === "dark") {
-        document.body.classList.add("dark");
-      } else {
-        document.body.classList.remove("dark");
-      }
-    } else {
-      const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (darkMode) {
-        document.body.classList.add("dark");
-      }
-    }
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
