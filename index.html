@@ -9,9 +9,12 @@
 <body>
   <header>
     <h1>LUBE YOU</h1>
-    <div class="cart" onclick="openCart()">
-      🛒 <span id="cart-count">0</span>
-    </div>
+    <!-- В header замените div с корзиной на это: -->
+<div class="cart-container">
+  <div class="cart" onclick="openCart()">
+    🛒 <span id="cart-count">0</span>
+  </div>
+</div>
   </header>
 
   <main id="product-list"></main>

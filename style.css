@@ -163,6 +163,61 @@ main {
   background: #2a4a70;
 }
 
+/* Стили для уведомления у корзины */
+.cart {
+  position: relative;
+}
+
+.cart-badge-notification {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ff4444;
+  color: white;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.3s ease;
+  z-index: 100;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.cart-badge-notification.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.cart-badge-notification.error {
+  background: #ff4444;
+}
+
+.cart-badge-notification.success {
+  background: #4CAF50;
+}
+
+.cart-badge-notification.info {
+  background: #2196F3;
+}
+
+/* Анимация появления */
+@keyframes pop {
+  0% { transform: scale(0.5); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.cart-badge-notification.visible {
+  animation: pop 0.3s ease;
+}
+
 /* Сообщения */
 .toast {
   position: fixed;

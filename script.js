@@ -214,22 +214,42 @@ function updateCartCount() {
   }
 }
 
-// Показ уведомления (теперь рядом с корзиной)
+// В script.js заменяем функцию showToast на эту версию:
 function showToast(message, type = 'info') {
-  // Позиционируем уведомление рядом с корзиной
-  const cartRect = cartIcon.getBoundingClientRect();
-  toast.style.top = `${cartRect.bottom + window.scrollY + 10}px`;
-  toast.style.left = `${cartRect.left}px`;
-  toast.style.transform = 'translateX(0)';
-  
-  toast.textContent = message;
-  toast.className = 'toast visible'; // Сбрасываем классы
-  toast.classList.add(type); // Добавляем класс типа сообщения
-  
-  setTimeout(() => {
-    toast.classList.remove('visible');
-    setTimeout(() => toast.className = 'toast', 300);
-  }, 3000);
+  try {
+    // Создаем или находим элемент для уведомления у корзины
+    let cartBadge = document.getElementById('cart-badge-notification');
+    if (!cartBadge) {
+      cartBadge = document.createElement('div');
+      cartBadge.id = 'cart-badge-notification';
+      cartBadge.className = 'cart-badge-notification';
+      document.querySelector('.cart').appendChild(cartBadge);
+    }
+
+    // Устанавливаем сообщение и стиль
+    cartBadge.textContent = message;
+    cartBadge.className = 'cart-badge-notification visible';
+    
+    // Добавляем класс типа сообщения
+    if (type === 'error') {
+      cartBadge.classList.add('error');
+    } else if (type === 'success') {
+      cartBadge.classList.add('success');
+    } else {
+      cartBadge.classList.add('info');
+    }
+
+    // Автоматическое скрытие через 3 секунды
+    setTimeout(() => {
+      cartBadge.classList.remove('visible');
+      setTimeout(() => {
+        cartBadge.textContent = '';
+        cartBadge.className = 'cart-badge-notification';
+      }, 300);
+    }, 3000);
+  } catch (error) {
+    console.error("Ошибка отображения уведомления:", error);
+  }
 }
 
 // Открытие корзины
