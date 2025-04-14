@@ -27,10 +27,19 @@ body {
   flex-direction: column;
 }
 
-header, footer {
+header {
   background-color: var(--card-bg);
   padding: 1rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 100;
+  position: sticky;
+  top: 0;
+}
+
+footer {
+  background-color: var(--card-bg);
+  padding: 1rem;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
   z-index: 100;
 }
 
@@ -121,13 +130,38 @@ main {
 .product-controls {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin-top: auto;
   padding-top: 1rem;
 }
 
-.add-to-cart-btn {
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantity-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--button-bg);
+  color: var(--button-text);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-value {
+  min-width: 20px;
+  text-align: center;
+}
+
+.add-to-cart-btn, .manage-quantity-btn {
   background: var(--button-bg);
   color: var(--button-text);
   border: none;
@@ -139,7 +173,11 @@ main {
   transition: background-color 0.2s;
 }
 
-.add-to-cart-btn:hover {
+.manage-quantity-btn {
+  display: none;
+}
+
+.add-to-cart-btn:hover, .manage-quantity-btn:hover {
   background: var(--nav-active);
 }
 
