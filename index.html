@@ -15,7 +15,9 @@
     </div>
   </header>
 
-  <main id="product-list" class="scrollable-content"></main>
+  <main id="product-list" class="scrollable-content">
+    <div class="loading">Загрузка товаров...</div>
+  </main>
 
   <div class="toast" id="toast"></div>
 
@@ -23,6 +25,15 @@
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
+  <script>
+    // Конфигурация Google Sheets
+    const CONFIG = {
+      API_KEY: 'AIzaSyB6VvX9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg', // Замените на ваш ключ
+      SPREADSHEET_ID: '1X9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg', // ID вашей таблицы
+      SHEET_NAME: 'Products', // Название листа
+      RANGE: 'A2:G100' // Диапазон данных (A1 - заголовки)
+    };
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
