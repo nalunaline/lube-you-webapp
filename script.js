@@ -11,91 +11,80 @@ async function init() {
   setupTheme();
   
   try {
+    container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
     await loadProductsFromSheets();
     renderProducts(products);
   } catch (error) {
     console.error("Ошибка загрузки товаров:", error);
-    showError("Ошибка загрузки товаров");
+    container.innerHTML = '<div class="error">Ошибка загрузки товаров</div>';
+    showToast("Ошибка загрузки товаров");
   }
 }
 
-// Загрузка товаров из Google Sheets
+// Загрузка товаров через Google Apps Script
 async function loadProductsFromSheets() {
-  try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CONFIG.SPREADSHEET_ID}/values/${CONFIG.SHEET_NAME}!${CONFIG.RANGE}?key=${CONFIG.API_KEY}`;
-    
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error(`Ошибка HTTP: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    if (!data.values || !Array.isArray(data.values)) {
-      throw new Error("Некорректный формат данных");
-    }
-    
-    // Преобразование данных таблицы в массив продуктов
-    products = data.values.map((row, index) => ({
-      id: row[0]?.toString() || `${index + 1}`,
-      name: row[1] || "Без названия",
-      category: row[2] || "Без категории",
-      description: row[3] || "Нет описания",
-      usage: row[4] || "Нет информации",
-      price: parseFloat(row[5]) || 0,
-      photo: validateImageUrl(row[6]) || "https://via.placeholder.com/150?text=No+Image"
-    }));
-    
-    console.log("Успешно загружено товаров:", products.length);
-  } catch (error) {
-    console.error("Ошибка при загрузке из Google Sheets:", error);
-    throw error;
+  // ЗАМЕНИТЕ НА ВАШ URL СКРИПТА
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyE_TIxfmfkGaDJhx2xcbXmG88ttB9d0MhjcFrZjLOIDQA0PdFDi8LDIqfFSsRgRCTMyg/exec';
+  
+  const response = await fetch(SCRIPT_URL);
+  const data = await response.json();
+  
+  products = data.map(item => ({
+    id: item.ID.toString(),
+    name: item.Name,
+    category: item.Category,
+    description: item.Description,
+    price: Number(item.Price),
+    photo: item.Photo || 'https://via.placeholder.com/150'
+  }));
+}
+
+// Рендеринг товаров
+function renderProducts(products) {
+  container.innerHTML = products.map(product => `
+    <div class="product-card">
+      <img src="${product.photo}" alt="${product.name}" class="product-image">
+      <div class="product-info">
+        <h3>${product.name}</h3>
+        <div class="product-price">${product.price}₽</div>
+        <div class="product-controls">
+          <button onclick="changeQuantity('${product.id}', -1)">−</button>
+          <span class="quantity">${cart[product.id]?.quantity || 0}</span>
+          <button onclick="changeQuantity('${product.id}', 1)">+</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Функции корзины
+function changeQuantity(productId, delta) {
+  if (!cart[productId]) {
+    const product = products.find(p => p.id === productId);
+    cart[productId] = {...product, quantity: 0};
   }
-}
-
-// Валидация URL изображения
-function validateImageUrl(url) {
-  if (!url) return null;
-  try {
-    new URL(url);
-    return url;
-  } catch {
-    return null;
+  
+  cart[productId].quantity += delta;
+  
+  if (cart[productId].quantity <= 0) {
+    delete cart[productId];
   }
-}
-
-// Показать сообщение об ошибке
-function showError(message) {
-  container.innerHTML = `<div class="error">${message}</div>`;
-  showToast(message);
-}
-
-// Работа с корзиной
-function updateCart() {
+  
   localStorage.setItem('cart', JSON.stringify(cart));
   updateCartCount();
+  
+  // Обновляем отображение количества
+  const quantityElement = document.querySelector(`.product-card[data-id="${productId}"] .quantity`);
+  if (quantityElement) {
+    quantityElement.textContent = cart[productId]?.quantity || 0;
+  }
 }
 
 function updateCartCount() {
   const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-  cartCount.textContent = total || 0;
+  cartCount.textContent = total;
 }
 
-// Тема Telegram WebApp
-function setupTheme() {
-  if (!window.Telegram?.WebApp) return;
-  
-  const theme = window.Telegram.WebApp.colorScheme;
-  document.body.classList.toggle('dark', theme === 'dark');
-  
-  window.Telegram.WebApp.onEvent('themeChanged', () => {
-    const newTheme = window.Telegram.WebApp.colorScheme;
-    document.body.classList.toggle('dark', newTheme === 'dark');
-  });
-}
-
-// Открытие корзины
 function openCart() {
   const items = Object.values(cart)
     .filter(item => item.quantity > 0)
@@ -111,87 +100,28 @@ function openCart() {
   }
 
   if (window.Telegram?.WebApp) {
-    try {
-      window.Telegram.WebApp.sendData(JSON.stringify({ items }));
-      cart = {};
-      updateCart();
-    } catch (e) {
-      console.error("Ошибка отправки данных:", e);
-      showToast("Ошибка отправки заказа");
-    }
+    window.Telegram.WebApp.sendData(JSON.stringify({ items }));
   } else {
-    console.log("Данные заказа (тест):", { items });
-    showToast("Режим тестирования: заказ не отправлен");
+    console.log("Тестовые данные:", { items });
+    showToast("Заказ отправлен (тест)");
   }
 }
 
-// Рендеринг товаров
-function renderProducts(products) {
-  if (!products?.length) {
-    showError("Товары не найдены");
-    return;
-  }
-
-  container.innerHTML = products.map(product => `
-    <div class="product-card" data-id="${product.id}">
-      <img src="${product.photo}" alt="${product.name}" class="product-image" 
-           loading="lazy" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
-      <div class="product-info">
-        <h3 class="product-title">${product.name}</h3>
-        <div class="product-category">${product.category}</div>
-        <div class="product-price">${product.price}₽</div>
-        <div class="product-description">${product.description}</div>
-        <div class="product-controls">
-          <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)">−</button>
-          <span class="quantity">${cart[product.id]?.quantity || 0}</span>
-          <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">+</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// Изменение количества товара
-function changeQuantity(productId, delta) {
-  if (!cart[productId]) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-    
-    cart[productId] = { ...product, quantity: 0 };
-  }
-  
-  cart[productId].quantity += delta;
-  
-  if (cart[productId].quantity <= 0) {
-    delete cart[productId];
-  }
-  
-  updateCart();
-  updateProductQuantity(productId);
-  
-  if (delta > 0) {
-    showToast("Добавлено в корзину");
-  }
-}
-
-// Обновление количества товара
-function updateProductQuantity(productId) {
-  const quantityElement = container.querySelector(`.product-card[data-id="${productId}"] .quantity`);
-  if (quantityElement) {
-    quantityElement.textContent = cart[productId]?.quantity || 0;
-  }
-}
-
-// Показать уведомление
+// Вспомогательные функции
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add('visible');
   setTimeout(() => toast.classList.remove('visible'), 3000);
 }
 
-// Запуск приложения
-document.addEventListener('DOMContentLoaded', init);
+function setupTheme() {
+  if (window.Telegram?.WebApp) {
+    document.body.classList.toggle('dark', 
+      window.Telegram.WebApp.colorScheme === 'dark');
+  }
+}
 
-// Глобальные функции для HTML
+// Инициализация
+document.addEventListener('DOMContentLoaded', init);
 window.changeQuantity = changeQuantity;
 window.openCart = openCart;

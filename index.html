@@ -1,39 +1,27 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LUBE YOU</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="fixed-header">
-    <h1 class="header-title">LUBE YOU</h1>
+  <header>
+    <h1>LUBE YOU</h1>
     <div class="cart" onclick="openCart()">
       🛒 <span id="cart-count">0</span>
     </div>
   </header>
 
-  <main id="product-list" class="scrollable-content">
-    <div class="loading">Загрузка товаров...</div>
-  </main>
+  <main id="product-list"></main>
 
   <div class="toast" id="toast"></div>
 
-  <footer class="fixed-footer">
-    <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
+  <footer>
+    <button onclick="openCart()">Оформить заказ</button>
   </footer>
 
-  <script>
-    // Конфигурация Google Sheets
-    const CONFIG = {
-      API_KEY: 'AIzaSyB6VvX9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg', // Замените на ваш ключ
-      SPREADSHEET_ID: '1X9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg3X9Xg', // ID вашей таблицы
-      SHEET_NAME: 'Products', // Название листа
-      RANGE: 'A2:G100' // Диапазон данных (A1 - заголовки)
-    };
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
