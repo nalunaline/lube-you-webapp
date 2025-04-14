@@ -1,120 +1,156 @@
 const container = document.getElementById("product-list");
 const cartCount = document.getElementById("cart-count");
-const MAX_QUANTITY = 10;
+const toast = document.getElementById("toast");
+const navButtons = document.querySelectorAll('.nav-btn');
 
 let cart = JSON.parse(localStorage.getItem('cart')) || {};
 let products = [];
 
-// Категории товаров
-const categories = {
-  poppers: [
-    {
-      id: "1",
-      name: "Swiss Navy Naked 118...",
-      price: 1800,
-      category: "poppers",
-      image: "https://example.com/popper1.jpg"
-    },
-    {
-      id: "2",
-      name: "Amsterdam Gold 25ml",
-      price: 1400,
-      category: "poppers",
-      image: "https://example.com/popper2.jpg"
-    }
-  ],
-  lubricants: [
-    {
-      id: "3",
-      name: "Lemon Lubricant 100...",
-      price: 900,
-      category: "lubricants",
-      image: "https://example.com/lube1.jpg"
-    }
-  ]
-};
+const directData = [
+  {
+    id: "1",
+    name: "J-Lube Powder 7g",
+    category: "Lubricants",
+    description: "Powder for preparing lubricant and soap bubbles, 7g, universal",
+    price: 251,
+    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube28b.jpg"
+  },
+  {
+    id: "2",
+    name: "K-Lube Powder 18g",
+    category: "Lubricants",
+    description: "Powder for lubricant, 18g, suitable for massage and intimate use",
+    price: 549,
+    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube56b.jpg"
+  },
+  {
+    id: "3",
+    name: "J-Lube Powder 56g",
+    category: "Lubricants",
+    description: "Powder for lubricant, 56g, economical volume for regular use",
+    price: 521,
+    photo: "https://nalunaline.github.io/lube-you-webapp/assets/images/jlube7.jpg"
+  }
+];
 
-function loadProducts(category = 'poppers') {
-  products = categories[category] || [];
-  renderProducts();
+function showCatalog() {
+  loadProducts();
+  setActiveNavButton('Каталог');
+}
+
+function setActiveNavButton(buttonText) {
+  navButtons.forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(buttonText));
+  });
+}
+
+function loadProducts() {
+  try {
+    container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
+    
+    products = directData.map(item => ({
+      id: item.id.toString(),
+      name: item.name,
+      category: item.category,
+      description: item.description,
+      price: Number(item.price),
+      photo: item.photo || 'https://via.placeholder.com/150'
+    }));
+    
+    renderProducts();
+  } catch (error) {
+    console.error("Ошибка загрузки:", error);
+    container.innerHTML = `<div class="error">Ошибка загрузки товаров: ${error.message}</div>`;
+    showToast("Ошибка загрузки данных");
+  }
 }
 
 function renderProducts() {
-  container.innerHTML = products.map(product => {
-    const inCart = cart[product.id]?.quantity || 0;
-    return `
-      <div class="product-card" data-id="${product.id}">
-        <img src="${product.image}" alt="${product.name}" class="product-image">
+  container.innerHTML = products.map(product => `
+    <div class="product-card" data-id="${product.id}">
+      <img src="${product.photo}" alt="${product.name}" 
+           class="product-image" loading="lazy"
+           onerror="this.src='https://via.placeholder.com/150'">
+      <div class="product-info">
         <h3 class="product-title">${product.name}</h3>
-        <div class="product-price">${product.price} ₽</div>
-        <div class="product-controls">
-          ${inCart > 0 ? `
-            <div class="quantity-controls">
-              <button class="quantity-btn" onclick="changeQuantity('${product.id}', -1)">-</button>
-              <div class="quantity-badge">${inCart}</div>
-              <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">+</button>
-            </div>
-          ` : `
-            <button class="quantity-btn" onclick="changeQuantity('${product.id}', 1)">Добавить</button>
-          `}
-        </div>
+        <div class="product-price">${product.price}₽</div>
+        <div class="product-description">${product.description}</div>
+        <button class="add-to-cart-btn" onclick="addToCart('${product.id}')">
+          Добавить в корзину
+        </button>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
-function changeQuantity(productId, delta) {
+function addToCart(productId) {
   const product = products.find(p => p.id === productId);
-  if (!product) return;
+  if (!product) {
+    showToast("Товар не найден");
+    return;
+  }
 
   if (!cart[productId]) {
-    cart[productId] = { ...product, quantity: 0 };
+    cart[productId] = { 
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 0
+    };
   }
 
-  const newQuantity = cart[productId].quantity + delta;
-  
-  if (newQuantity < 0) return;
-  if (newQuantity > MAX_QUANTITY) return;
-
-  cart[productId].quantity = newQuantity;
-
-  if (cart[productId].quantity === 0) {
-    delete cart[productId];
-  }
+  cart[productId].quantity += 1;
+  showToast(`${product.name} добавлен в корзину`);
 
   saveCart();
-  updateCart();
-  renderProducts();
+  updateCartCount();
+  animateAddToCart(productId);
+}
+
+function animateAddToCart() {
+  cartCount.classList.add('bounce');
+  setTimeout(() => cartCount.classList.remove('bounce'), 500);
 }
 
 function saveCart() {
   localStorage.setItem('cart', JSON.stringify(cart));
 }
 
-function updateCart() {
+function updateCartCount() {
   const total = Object.values(cart).reduce((sum, item) => sum + item.quantity, 0);
-  cartCount.textContent = total > 0 ? `(${total})` : '';
+  cartCount.textContent = total;
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('visible');
+  setTimeout(() => toast.classList.remove('visible'), 3000);
 }
 
 function openCart() {
-  if (Object.keys(cart).length === 0) {
-    alert("Корзина пуста");
+  setActiveNavButton('Корзина');
+  
+  const items = Object.values(cart);
+  if (items.length === 0) {
+    showToast("Корзина пуста");
     return;
   }
 
+  const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const message = `Ваш заказ:\n${items.map(item => 
+    `- ${item.name} (${item.quantity} × ${item.price}₽)`
+  ).join('\n')}\n\nИтого: ${total}₽`;
+  
   if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.sendData(JSON.stringify(cart));
+    window.Telegram.WebApp.sendData(JSON.stringify({ items, total }));
+    showToast("Заказ отправлен");
   } else {
-    alert(`Заказ отправлен!\nТоваров: ${Object.values(cart).reduce((sum, item) => sum + item.quantity, 0)}`);
+    alert(message);
+    console.log("Данные корзины:", { items, total });
   }
 }
 
-function showCategory(category) {
-  loadProducts(category);
-}
-
-// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
-  loadProducts();
-  updateCart();
+  showCatalog();
+  updateCartCount();
 });

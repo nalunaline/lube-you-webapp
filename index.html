@@ -3,27 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Попперсы Москва | А...</title>
+  <title>LUBE YOU</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <nav class="header-nav">
-      <button class="nav-btn" onclick="showCategory('poppers')">Каталог</button>
+      <button class="nav-btn active" onclick="showCatalog()">Каталог</button>
       <button class="nav-btn" onclick="openCart()">Корзина <span id="cart-count">0</span></button>
-      <a class="nav-btn" href="https://t.me/am_danko" target="_blank">Связаться</a>
     </nav>
   </header>
 
   <main id="product-list"></main>
 
-  <footer>
-    <div class="footer-notice">
-      Уведомляем, что бот работает в тестовом режиме, в случае вопросов обращайтесь @egorpoppers
-    </div>
+  <div class="toast" id="toast"></div>
+
+  <footer class="sticky-footer">
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
+  <script>
+    // Определяем тему на основе Telegram WebApp
+    if (window.Telegram?.WebApp) {
+      const theme = window.Telegram.WebApp.colorScheme;
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    } else {
+      const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (darkMode) {
+        document.body.classList.add("dark");
+      }
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
