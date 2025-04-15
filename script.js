@@ -1,9 +1,9 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbzMAgWIDihKnn9_DTiBTy4db8Skrfw3dlV8VlcP1crArjK7-7y42vgCuHKNeKsTv4y72A/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxJKno6H5HC8t6dZty-Ui16yhjKV7EMnyeoYj2MGQXk6tjPOTnsy8k6nR9TwB4MW6JiIw/exec';
 
 class ProductAPI {
   static async getProducts() {
     try {
-      const response = await fetch(`${API_URL}?sheetName=Products`);
+      const response = await fetch(API_URL);
       if (!response.ok) throw new Error('Network error');
       const data = await response.json();
       return data.data || [];
@@ -51,18 +51,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Загрузка товаров
   const products = await ProductAPI.getProducts();
   renderProducts(products);
+  updateCartCount();
 
-  // Обработчики кнопок
-  document.querySelector('.nav-btn[onclick="showCatalog()"]').addEventListener('click', () => {
-    renderProducts(products);
-  });
-
-  document.querySelector('.checkout-button').addEventListener('click', () => {
-    if (cart.totalItems === 0) {
-      showToast('Корзина пуста');
-      return;
-    }
-    openCart();
+  // Обработчики событий
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
   });
 });
 
@@ -70,27 +66,35 @@ function renderProducts(products) {
   const container = document.getElementById('product-list');
   container.innerHTML = products.map(product => `
     <div class="product-card">
-      <img src="${product.image || 'no-image.jpg'}" alt="${product.name}" class="product-image">
-      <h3>${product.name}</h3>
-      <div class="price">${product.price} ₽</div>
+      <img src="${product.image_url || 'no-image.jpg'}" 
+           alt="${product.name}" 
+           class="product-image"
+           onerror="this.src='no-image.jpg'">
+      <h3 class="product-title">${product.name}</h3>
+      <div class="product-description">${product.description}</div>
+      <div class="product-price">${product.price} ₽</div>
       <button class="add-btn" data-id="${product.id}">В корзину</button>
     </div>
   `).join('');
 
-  // Добавляем обработчики для новых кнопок
+  // Обработчики для кнопок
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const productId = e.target.dataset.id;
-      const product = products.find(p => p.id === productId);
-      cart.add(productId, product);
-      showToast(`${product.name} добавлен в корзину`);
+      const product = products.find(p => p.id == productId);
+      if (product) {
+        cart.add(productId, product);
+        showToast(`${product.name} добавлен в корзину`);
+      }
     });
   });
 }
 
 function updateCartCount() {
   const countElement = document.getElementById('cart-count');
-  countElement.textContent = window.cart.totalItems;
+  if (countElement) {
+    countElement.textContent = window.cart.totalItems || '0';
+  }
 }
 
 function showToast(message) {
@@ -98,4 +102,13 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function openCart() {
+  if (window.cart.totalItems === 0) {
+    showToast('Корзина пуста');
+    return;
+  }
+  // Здесь будет логика открытия корзины
+  alert(`Заказ оформлен! Товаров: ${window.cart.totalItems}`);
 }
