@@ -1,4 +1,4 @@
-const API_URL = 'https://script.google.com/macros/s/AKfycbxeQ_vwEUyGKz8XMPK8NM3MI5OsdlDQmUQ700JfweqQi96c_NlDSN3qENyNaltgbrCZ9w/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzMAgWIDihKnn9_DTiBTy4db8Skrfw3dlV8VlcP1crArjK7-7y42vgCuHKNeKsTv4y72A/exec';
 
 class ProductAPI {
   static async getProducts() {
