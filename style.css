@@ -129,7 +129,7 @@ body {
   margin-top: auto;
 }
 
-.add-btn, .quantity-btn {
+.quantity-btn {
   background: var(--button-bg);
   color: var(--button-text);
   border: none;
@@ -140,7 +140,7 @@ body {
   font-size: 16px;
 }
 
-.add-btn:hover, .quantity-btn:hover {
+.quantity-btn:hover {
   background: #3a5f8c;
 }
 
@@ -194,6 +194,22 @@ body {
 
 .toast.show {
   opacity: 1;
+}
+
+/* Загрузка и ошибки */
+.loading, .error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.loading {
+  color: var(--accent-color);
+}
+
+.error {
+  color: #ff4444;
 }
 
 /* Адаптивность */
