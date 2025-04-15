@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Попперсы Москва | А...</title>
+  <title>LUBE YOU | Интернет-магазин</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <nav class="header-nav">
-      <button class="nav-btn active" onclick="showCategory('poppers')">Каталог</button>
-      <button class="nav-btn" onclick="showCart()">Корзина <span id="cart-count">0</span></button>
+      <button class="nav-btn active" onclick="showCatalog()">Каталог</button>
+      <button class="nav-btn" onclick="openCart()">Корзина <span id="cart-count"></span></button>
     </nav>
   </header>
 
   <main id="product-list"></main>
 
-  <footer>
+  <div class="toast" id="toast"></div>
+
+  <footer class="sticky-footer">
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
