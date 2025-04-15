@@ -9,8 +9,8 @@
 <body>
   <header>
     <nav class="header-nav">
-      <button class="nav-btn active" onclick="showCatalog()">Каталог</button>
-      <button class="nav-btn" onclick="openCart()">Корзина <span id="cart-count"></span></button>
+      <button class="nav-btn active" onclick="showCatalog()">📋 Каталог</button>
+      <button class="nav-btn cart-btn" onclick="openCart()">🛒 Корзина <span id="cart-count">0</span></button>
     </nav>
   </header>
 
@@ -22,6 +22,27 @@
     <button class="checkout-button" onclick="openCart()">Оформить заказ</button>
   </footer>
 
+  <script>
+    // Поддержка тёмной темы
+    if (window.Telegram?.WebApp) {
+      const theme = window.Telegram.WebApp.colorScheme;
+      if (theme === "dark") {
+        document.body.classList.add("dark");
+      }
+    } else {
+      const darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (darkMode) {
+        document.body.classList.add("dark");
+      }
+    }
+
+    // Функция-заглушка для каталога
+    function showCatalog() {
+      // Пока просто переключаем активную кнопку
+      document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('.nav-btn:not(.cart-btn)').classList.add('active');
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
